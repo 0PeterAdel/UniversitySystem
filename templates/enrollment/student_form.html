@@ -1,0 +1,110 @@
+{% extends 'base.html' %}
+{% load form_tags %}
+
+{% block title %}{% if form.instance.pk %}Edit{% else %}Add{% endif %} Student - SEAS{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1>{% if form.instance.pk %}Edit{% else %}Add{% endif %} Student</h1>
+        <a href="{% url 'student-list' %}" class="btn btn-secondary">
+            <i class="fas fa-arrow-left me-2"></i> Back to Students
+        </a>
+    </div>
+    
+    <div class="card card-dashboard">
+        <div class="card-body">
+            <form method="post" novalidate>
+                {% csrf_token %}
+                
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label for="id_student_id" class="form-label">Student ID</label>
+                        {{ form.student_id|add_class:"form-control" }}
+                        {% if form.student_id.errors %}
+                            <div class="text-danger">{{ form.student_id.errors }}</div>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="col-md-6 mb-3">
+                        <label for="id_email" class="form-label">Email</label>
+                        {{ form.email|add_class:"form-control" }}
+                        {% if form.email.errors %}
+                            <div class="text-danger">{{ form.email.errors }}</div>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label for="id_first_name" class="form-label">First Name</label>
+                        {{ form.first_name|add_class:"form-control" }}
+                        {% if form.first_name.errors %}
+                            <div class="text-danger">{{ form.first_name.errors }}</div>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="col-md-6 mb-3">
+                        <label for="id_last_name" class="form-label">Last Name</label>
+                        {{ form.last_name|add_class:"form-control" }}
+                        {% if form.last_name.errors %}
+                            <div class="text-danger">{{ form.last_name.errors }}</div>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                <div class="row">
+                    <div class="col-md-4 mb-3">
+                        <label for="id_date_of_birth" class="form-label">Date of Birth</label>
+                        {{ form.date_of_birth|add_class:"form-control" }}
+                        {% if form.date_of_birth.errors %}
+                            <div class="text-danger">{{ form.date_of_birth.errors }}</div>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="col-md-4 mb-3">
+                        <label for="id_gender" class="form-label">Gender</label>
+                        {{ form.gender|add_class:"form-select" }}
+                        {% if form.gender.errors %}
+                            <div class="text-danger">{{ form.gender.errors }}</div>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="col-md-4 mb-3">
+                        <label for="id_cgpa" class="form-label">CGPA</label>
+                        {{ form.cgpa|add_class:"form-control" }}
+                        {% if form.cgpa.errors %}
+                            <div class="text-danger">{{ form.cgpa.errors }}</div>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label for="id_department" class="form-label">Department</label>
+                        {{ form.department|add_class:"form-select" }}
+                        {% if form.department.errors %}
+                            <div class="text-danger">{{ form.department.errors }}</div>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="col-md-6 mb-3">
+                        <label for="id_admission_date" class="form-label">Admission Date</label>
+                        {{ form.admission_date|add_class:"form-control" }}
+                        {% if form.admission_date.errors %}
+                            <div class="text-danger">{{ form.admission_date.errors }}</div>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                <div class="mt-4">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save me-2"></i> Save Student
+                    </button>
+                    <a href="{% url 'student-list' %}" class="btn btn-outline-secondary ms-2">Cancel</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

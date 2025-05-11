@@ -1,0 +1,99 @@
+{% extends 'base.html' %}
+{% load form_tags %}
+
+{% block title %}Student Performance - SEAS{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <h1 class="mb-4">Student Performance</h1>
+    
+    <div class="card card-dashboard mb-4">
+        <div class="card-header bg-light">
+            <h5 class="card-title mb-0">Filter by Department</h5>
+        </div>
+        <div class="card-body">
+            <form method="get" action="{% url 'student-performance' %}" class="row g-3">
+                <div class="col-md-10">
+                    <select name="department" class="form-select">
+                        <option value="">-- Select Department --</option>
+                        {% for dept in departments %}
+                            <option value="{{ dept.id }}" {% if selected_department == dept.id|stringformat:"s" %}selected{% endif %}>
+                                {{ dept.code }} - {{ dept.name }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <button type="submit" class="btn btn-primary w-100">Filter</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    {% if students %}
+        <div class="card card-dashboard">
+            <div class="card-header bg-light">
+                <h5 class="card-title mb-0">Student Performance</h5>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Student ID</th>
+                                <th>Name</th>
+                                <th>CGPA</th>
+                                <th>Admission Date</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for student in students %}
+                            <tr>
+                                <td>{{ student.student_id }}</td>
+                                <td>{{ student.full_name }}</td>
+                                <td>
+                                    {% if student.cgpa %}
+                                        <div class="progress" style="height: 20px;">
+                                            {% with cgpa_percent=student.cgpa|floatformat:2|mul:25 %}
+                                                <div class="progress-bar 
+                                                    {% if student.cgpa >= 3.7 %}bg-success
+                                                    {% elif student.cgpa >= 3.0 %}bg-info
+                                                    {% elif student.cgpa >= 2.0 %}bg-warning
+                                                    {% else %}bg-danger{% endif %}" 
+                                                    role="progressbar" 
+                                                    style="width: {{ cgpa_percent }}%;" 
+                                                    aria-valuenow="{{ student.cgpa }}" 
+                                                    aria-valuemin="0" 
+                                                    aria-valuemax="4">
+                                                    {{ student.cgpa }}
+                                                </div>
+                                            {% endwith %}
+                                        </div>
+                                    {% else %}
+                                        <span class="text-muted">N/A</span>
+                                    {% endif %}
+                                </td>
+                                <td>{{ student.admission_date }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    {% elif selected_department %}
+        <div class="alert alert-info">
+            No students found for the selected department.
+        </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Custom filter to multiply values
+    function mul(value, arg) {
+        return parseFloat(value) * parseFloat(arg);
+    }
+</script>
+{% endblock %}

@@ -1,0 +1,84 @@
+/* Custom styles for SEAS */
+
+/* Dashboard cards */
+.card-dashboard {
+    border-radius: 10px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s;
+    margin-bottom: 20px;
+}
+
+.card-dashboard:hover {
+    transform: translateY(-5px);
+}
+
+/* Sidebar styles */
+.sidebar {
+    min-height: calc(100vh - 56px);
+    background-color: #343a40;
+    color: white;
+}
+
+.sidebar a {
+    color: rgba(255, 255, 255, 0.8);
+    text-decoration: none;
+    padding: 10px 15px;
+    display: block;
+}
+
+.sidebar a:hover {
+    color: white;
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+.sidebar .nav-item.active a {
+    background-color: rgba(255, 255, 255, 0.2);
+    color: white;
+}
+
+/* Main content area */
+.main-content {
+    padding: 20px;
+}
+
+/* Form styling */
+.form-control:focus, .form-select:focus {
+    border-color: #80bdff;
+    box-shadow: 0 0 0 0.25rem rgba(0, 123, 255, 0.25);
+}
+
+/* Table styling */
+.table-hover tbody tr:hover {
+    background-color: rgba(0, 123, 255, 0.05);
+}
+
+/* Chart container */
+.chart-container {
+    position: relative;
+    height: 400px;
+    width: 100%;
+}
+
+/* Custom colors for CGPA ranges */
+.cgpa-excellent {
+    color: #28a745;
+}
+
+.cgpa-good {
+    color: #17a2b8;
+}
+
+.cgpa-average {
+    color: #ffc107;
+}
+
+.cgpa-poor {
+    color: #dc3545;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .sidebar {
+        min-height: auto;
+    }
+}

@@ -1,0 +1,201 @@
+{% extends 'base.html' %}
+
+{% block title %}Dashboard - SEAS{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <h1 class="mb-4">Dashboard</h1>
+    
+    <!-- Stats Cards -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card card-dashboard bg-primary text-white">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="card-title">Total Students</h6>
+                            <h2 class="mb-0">{{ total_students }}</h2>
+                        </div>
+                        <i class="fas fa-user-graduate fa-3x opacity-50"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-3">
+            <div class="card card-dashboard bg-success text-white">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="card-title">Total Courses</h6>
+                            <h2 class="mb-0">{{ total_courses }}</h2>
+                        </div>
+                        <i class="fas fa-book fa-3x opacity-50"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-3">
+            <div class="card card-dashboard bg-info text-white">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="card-title">Total Departments</h6>
+                            <h2 class="mb-0">{{ total_departments }}</h2>
+                        </div>
+                        <i class="fas fa-building fa-3x opacity-50"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-3">
+            <div class="card card-dashboard bg-warning text-white">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="card-title">Total Enrollments</h6>
+                            <h2 class="mb-0">{{ total_enrollments }}</h2>
+                        </div>
+                        <i class="fas fa-clipboard-list fa-3x opacity-50"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="row">
+        <!-- Department-wise Student Count -->
+        <div class="col-md-6 mb-4">
+            <div class="card card-dashboard h-100">
+                <div class="card-header bg-light">
+                    <h5 class="card-title mb-0">Department-wise Student Count</h5>
+                </div>
+                <div class="card-body">
+                    <canvas id="deptStudentChart"></canvas>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Recent Enrollments -->
+        <div class="col-md-6 mb-4">
+            <div class="card card-dashboard h-100">
+                <div class="card-header bg-light">
+                    <h5 class="card-title mb-0">Recent Enrollments</h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Student</th>
+                                    <th>Course</th>
+                                    <th>Semester</th>
+                                    <th>Year</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for enrollment in recent_enrollments %}
+                                <tr>
+                                    <td>{{ enrollment.student.full_name }}</td>
+                                    <td>{{ enrollment.course.course_code }}</td>
+                                    <td>{{ enrollment.semester }}</td>
+                                    <td>{{ enrollment.year }}</td>
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="4" class="text-center">No enrollments found</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Quick Links -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card card-dashboard">
+                <div class="card-header bg-light">
+                    <h5 class="card-title mb-0">Quick Links</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-3 mb-3">
+                            <a href="{% url 'student-create' %}" class="btn btn-outline-primary w-100">
+                                <i class="fas fa-plus me-2"></i> Add Student
+                            </a>
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <a href="{% url 'course-create' %}" class="btn btn-outline-success w-100">
+                                <i class="fas fa-plus me-2"></i> Add Course
+                            </a>
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <a href="{% url 'department-create' %}" class="btn btn-outline-info w-100">
+                                <i class="fas fa-plus me-2"></i> Add Department
+                            </a>
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <a href="{% url 'enrollment-create' %}" class="btn btn-outline-warning w-100">
+                                <i class="fas fa-plus me-2"></i> Add Enrollment
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Department-wise Student Count Chart
+        const deptCtx = document.getElementById('deptStudentChart').getContext('2d');
+        const deptStudentChart = new Chart(deptCtx, {
+            type: 'bar',
+            data: {
+                labels: [{% for dept in dept_student_count %}'{{ dept.name }}'{% if not forloop.last %}, {% endif %}{% endfor %}],
+                datasets: [{
+                    label: 'Number of Students',
+                    data: [{% for dept in dept_student_count %}{{ dept.student_count }}{% if not forloop.last %}, {% endif %}{% endfor %}],
+                    backgroundColor: [
+                        'rgba(54, 162, 235, 0.7)',
+                        'rgba(255, 99, 132, 0.7)',
+                        'rgba(255, 206, 86, 0.7)',
+                        'rgba(75, 192, 192, 0.7)',
+                        'rgba(153, 102, 255, 0.7)',
+                        'rgba(255, 159, 64, 0.7)'
+                    ],
+                    borderColor: [
+                        'rgba(54, 162, 235, 1)',
+                        'rgba(255, 99, 132, 1)',
+                        'rgba(255, 206, 86, 1)',
+                        'rgba(75, 192, 192, 1)',
+                        'rgba(153, 102, 255, 1)',
+                        'rgba(255, 159, 64, 1)'
+                    ],
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            precision: 0
+                        }
+                    }
+                }
+            }
+        });
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,123 @@
+{% extends 'base.html' %}
+{% load form_tags %}
+
+{% block title %}Enrollment Analysis - SEAS{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <h1 class="mb-4">Enrollment Analysis</h1>
+    
+    <div class="row">
+        <div class="col-md-4">
+            <div class="card card-dashboard mb-4">
+                <div class="card-header bg-light">
+                    <h5 class="card-title mb-0">Analysis Parameters</h5>
+                </div>
+                <div class="card-body">
+                    <form method="get" action="{% url 'enrollment-analysis' %}">
+                        <div class="mb-3">
+                            <label for="id_analysis_type" class="form-label">Analysis Type</label>
+                            {{ form.analysis_type.label_tag }}
+                            {{ form.analysis_type|add_class:"form-select" }}
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="id_start_date" class="form-label">Start Date</label>
+                            {{ form.start_date|add_class:"form-control" }}
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="id_end_date" class="form-label">End Date</label>
+                            {{ form.end_date|add_class:"form-control" }}
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="id_department" class="form-label">Department (Optional)</label>
+                            {{ form.department|add_class:"form-select" }}
+                        </div>
+                        
+                        <button type="submit" class="btn btn-primary w-100">
+                            <i class="fas fa-chart-bar me-2"></i> Generate Analysis
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-8">
+            <div class="card card-dashboard">
+                <div class="card-header bg-light">
+                    <h5 class="card-title mb-0">Analysis Results</h5>
+                </div>
+                <div class="card-body">
+                    <canvas id="analysisChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const analysisData = {{ analysis_data|safe }};
+        
+        if (analysisData && analysisData.labels && analysisData.labels.length > 0) {
+            const ctx = document.getElementById('analysisChart').getContext('2d');
+            const analysisChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: analysisData.labels,
+                    datasets: [{
+                        label: 'Number of Enrollments',
+                        data: analysisData.data,
+                        backgroundColor: [
+                            'rgba(54, 162, 235, 0.7)',
+                            'rgba(255, 99, 132, 0.7)',
+                            'rgba(255, 206, 86, 0.7)',
+                            'rgba(75, 192, 192, 0.7)',
+                            'rgba(153, 102, 255, 0.7)',
+                            'rgba(255, 159, 64, 0.7)'
+                        ],
+                        borderColor: [
+                            'rgba(54, 162, 235, 1)',
+                            'rgba(255, 99, 132, 1)',
+                            'rgba(255, 206, 86, 1)',
+                            'rgba(75, 192, 192, 1)',
+                            'rgba(153, 102, 255, 1)',
+                            'rgba(255, 159, 64, 1)'
+                        ],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: analysisData.chart_title || 'Enrollment Analysis',
+                            font: {
+                                size: 16
+                            }
+                        },
+                        legend: {
+                            display: false
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                precision: 0
+                            }
+                        }
+                    }
+                }
+            });
+        } else {
+            document.getElementById('analysisChart').innerHTML = '<div class="text-center p-5"><p class="text-muted">Select analysis parameters and click "Generate Analysis" to view results</p></div>';
+        }
+    });
+</script>
+{% endblock %}
