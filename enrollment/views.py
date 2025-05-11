@@ -217,9 +217,140 @@ class EnrollmentDeleteView(LoginRequiredMixin, DeleteView):
         return super().delete(request, *args, **kwargs)
 
 # Analysis Views
+def analysis_dashboard(request):
+    # Get counts
+    department_count = Department.objects.count()
+    student_count = Student.objects.count()
+    course_count = Course.objects.count()
+    enrollment_count = Enrollment.objects.count()
+    
+    # Get departments with stats
+    departments = Department.objects.annotate(
+        student_count=Count('students', distinct=True),
+        course_count=Count('courses', distinct=True),
+        enrollment_count=Count('students__enrollments', distinct=True)
+    )
+    
+    # Get top courses by enrollment
+    top_courses = Course.objects.annotate(
+        enrollment_count=Count('enrollments')
+    ).order_by('-enrollment_count')[:5]
+    
+    # Get recent enrollments
+    recent_enrollments = Enrollment.objects.select_related(
+        'student', 'course', 'course__department'
+    ).order_by('-enrollment_date')[:10]
+    
+    context = {
+        'department_count': department_count,
+        'student_count': student_count,
+        'course_count': course_count,
+        'enrollment_count': enrollment_count,
+        'departments': departments,
+        'top_courses': top_courses,
+        'recent_enrollments': recent_enrollments,
+    }
+    
+    return render(request, 'enrollment/analysis_dashboard.html', context)
+
+def department_analysis(request):
+    # Get departments with stats
+    departments = Department.objects.annotate(
+        student_count=Count('students', distinct=True),
+        course_count=Count('courses', distinct=True),
+        enrollment_count=Count('students__enrollments', distinct=True),
+        avg_cgpa=Avg('students__cgpa')
+    )
+    
+    context = {
+        'departments': departments,
+    }
+    
+    return render(request, 'enrollment/department_analysis.html', context)
+
+def course_analysis(request):
+    # Get all courses with stats
+    courses = Course.objects.annotate(
+        enrollment_count=Count('enrollments')
+    ).select_related('department').order_by('-enrollment_count')
+    
+    # Get top courses by enrollment
+    top_courses = courses[:10]
+    
+    # Calculate grade distribution
+    grade_distribution = {
+        'A': Enrollment.objects.filter(grade='A').count(),
+        'A_minus': Enrollment.objects.filter(grade='A-').count(),
+        'B_plus': Enrollment.objects.filter(grade='B+').count(),
+        'B': Enrollment.objects.filter(grade='B').count(),
+        'B_minus': Enrollment.objects.filter(grade='B-').count(),
+        'C_plus': Enrollment.objects.filter(grade='C+').count(),
+        'C': Enrollment.objects.filter(grade='C').count(),
+        'C_minus': Enrollment.objects.filter(grade='C-').count(),
+        'D_plus': Enrollment.objects.filter(grade='D+').count(),
+        'D': Enrollment.objects.filter(grade='D').count(),
+        'F': Enrollment.objects.filter(grade='F').count(),
+        'W': Enrollment.objects.filter(grade='W').count(),
+        'I': Enrollment.objects.filter(grade='I').count(),
+    }
+    
+    context = {
+        'courses': courses,
+        'top_courses': top_courses,
+        'grade_distribution': grade_distribution,
+    }
+    
+    return render(request, 'enrollment/course_analysis.html', context)
+
+def student_analysis(request):
+    # Get top students by CGPA
+    top_students = Student.objects.annotate(
+        enrollment_count=Count('enrollments')
+    ).order_by('-cgpa')[:20]
+    
+    # Get departments with stats
+    departments = Department.objects.annotate(
+        student_count=Count('students', distinct=True),
+        avg_cgpa=Avg('students__cgpa')
+    )
+    
+    # Calculate CGPA distribution
+    cgpa_distribution = {
+        'range_0_0_5': Student.objects.filter(cgpa__gte=0, cgpa__lt=0.5).count(),
+        'range_0_5_1_0': Student.objects.filter(cgpa__gte=0.5, cgpa__lt=1.0).count(),
+        'range_1_0_1_5': Student.objects.filter(cgpa__gte=1.0, cgpa__lt=1.5).count(),
+        'range_1_5_2_0': Student.objects.filter(cgpa__gte=1.5, cgpa__lt=2.0).count(),
+        'range_2_0_2_5': Student.objects.filter(cgpa__gte=2.0, cgpa__lt=2.5).count(),
+        'range_2_5_3_0': Student.objects.filter(cgpa__gte=2.5, cgpa__lt=3.0).count(),
+        'range_3_0_3_5': Student.objects.filter(cgpa__gte=3.0, cgpa__lt=3.5).count(),
+        'range_3_5_4_0': Student.objects.filter(cgpa__gte=3.5, cgpa__lte=4.0).count(),
+    }
+    
+    context = {
+        'top_students': top_students,
+        'departments': departments,
+        'cgpa_distribution': cgpa_distribution,
+    }
+    
+    return render(request, 'enrollment/student_analysis.html', context)
+
 @login_required
 def enrollment_analysis(request):
     form = EnrollmentAnalysisForm(request.GET or None)
+    
+    # Get enrollment counts
+    enrollment_count = Enrollment.objects.count()
+    student_count = Student.objects.count()
+    course_count = Course.objects.count()
+    
+    # Calculate averages
+    avg_enrollments_per_student = enrollment_count / student_count if student_count > 0 else 0
+    avg_enrollments_per_course = enrollment_count / course_count if course_count > 0 else 0
+    
+    # Get departments with enrollment counts
+    departments = Department.objects.annotate(
+        enrollment_count=Count('students__enrollments', distinct=True)
+    )
     
     analysis_data = {}
     labels = []
@@ -291,7 +422,12 @@ def enrollment_analysis(request):
     
     context = {
         'form': form,
-        'analysis_data': json.dumps(analysis_data)
+        'analysis_data': json.dumps(analysis_data),
+        'enrollment_count': enrollment_count,
+        'avg_enrollments_per_student': avg_enrollments_per_student,
+        'avg_enrollments_per_course': avg_enrollments_per_course,
+        'avg_grade': 'B+',  # Placeholder, calculate actual average grade if needed
+        'departments': departments,
     }
     
     return render(request, 'enrollment/enrollment_analysis.html', context)

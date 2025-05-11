@@ -1,0 +1,171 @@
+{% extends 'base.html' %}
+
+{% block title %}Analysis Dashboard - SEAS{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1>Analysis Dashboard</h1>
+    </div>
+
+    <div class="row">
+        <!-- Summary Cards -->
+        <div class="col-md-3 mb-4">
+            <div class="card card-dashboard h-100">
+                <div class="card-body text-center">
+                    <h5 class="card-title">Total Departments</h5>
+                    <h2 class="display-4">{{ department_count }}</h2>
+                    <a href="{% url 'department-list' %}" class="btn btn-sm btn-outline-primary mt-2">View All</a>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-3 mb-4">
+            <div class="card card-dashboard h-100">
+                <div class="card-body text-center">
+                    <h5 class="card-title">Total Students</h5>
+                    <h2 class="display-4">{{ student_count }}</h2>
+                    <a href="{% url 'student-list' %}" class="btn btn-sm btn-outline-primary mt-2">View All</a>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-3 mb-4">
+            <div class="card card-dashboard h-100">
+                <div class="card-body text-center">
+                    <h5 class="card-title">Total Courses</h5>
+                    <h2 class="display-4">{{ course_count }}</h2>
+                    <a href="{% url 'course-list' %}" class="btn btn-sm btn-outline-primary mt-2">View All</a>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-3 mb-4">
+            <div class="card card-dashboard h-100">
+                <div class="card-body text-center">
+                    <h5 class="card-title">Total Enrollments</h5>
+                    <h2 class="display-4">{{ enrollment_count }}</h2>
+                    <a href="{% url 'enrollment-list' %}" class="btn btn-sm btn-outline-primary mt-2">View All</a>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Department Analysis -->
+        <div class="col-md-6 mb-4">
+            <div class="card card-dashboard h-100">
+                <div class="card-header bg-light">
+                    <h5 class="card-title mb-0">Department Analysis</h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Department</th>
+                                    <th>Students</th>
+                                    <th>Courses</th>
+                                    <th>Enrollments</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for dept in departments %}
+                                <tr>
+                                    <td>{{ dept.code }} - {{ dept.name }}</td>
+                                    <td>{{ dept.student_count }}</td>
+                                    <td>{{ dept.course_count }}</td>
+                                    <td>{{ dept.enrollment_count }}</td>
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="4" class="text-center">No departments found</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Course Analysis -->
+        <div class="col-md-6 mb-4">
+            <div class="card card-dashboard h-100">
+                <div class="card-header bg-light">
+                    <h5 class="card-title mb-0">Course Analysis</h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Course</th>
+                                    <th>Department</th>
+                                    <th>Enrollments</th>
+                                    <th>Avg. Grade</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for course in top_courses %}
+                                <tr>
+                                    <td>{{ course.course_code }} - {{ course.title }}</td>
+                                    <td>{{ course.department.code }}</td>
+                                    <td>{{ course.enrollment_count }}</td>
+                                    <td>{{ course.avg_grade|default:"N/A" }}</td>
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="4" class="text-center">No courses found</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Recent Enrollments -->
+        <div class="col-md-12 mb-4">
+            <div class="card card-dashboard">
+                <div class="card-header bg-light">
+                    <h5 class="card-title mb-0">Recent Enrollments</h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Student</th>
+                                    <th>Course</th>
+                                    <th>Department</th>
+                                    <th>Semester</th>
+                                    <th>Year</th>
+                                    <th>Grade</th>
+                                    <th>Enrollment Date</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for enrollment in recent_enrollments %}
+                                <tr>
+                                    <td>{{ enrollment.student.student_id }} - {{ enrollment.student.full_name }}</td>
+                                    <td>{{ enrollment.course.course_code }} - {{ enrollment.course.title }}</td>
+                                    <td>{{ enrollment.course.department.code }}</td>
+                                    <td>{{ enrollment.semester }}</td>
+                                    <td>{{ enrollment.year }}</td>
+                                    <td>{{ enrollment.grade|default:"N/A" }}</td>
+                                    <td>{{ enrollment.enrollment_date }}</td>
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="7" class="text-center">No enrollments found</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

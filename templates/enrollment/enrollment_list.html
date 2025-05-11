@@ -1,0 +1,68 @@
+{% extends 'base.html' %}
+
+{% block title %}Enrollments - SEAS{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1>Enrollments</h1>
+        {% if user.is_authenticated %}
+        <a href="{% url 'enrollment-create' %}" class="btn btn-primary">
+            <i class="fas fa-plus me-2"></i> Add Enrollment
+        </a>
+        {% endif %}
+    </div>
+
+    <div class="card card-dashboard">
+        <div class="card-header bg-light">
+            <h5 class="card-title mb-0">Enrollment List</h5>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>Student</th>
+                            <th>Course</th>
+                            <th>Semester</th>
+                            <th>Year</th>
+                            <th>Grade</th>
+                            <th>Enrollment Date</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for enrollment in enrollments %}
+                        <tr>
+                            <td>{{ enrollment.student.student_id }} - {{ enrollment.student.full_name }}</td>
+                            <td>{{ enrollment.course.course_code }} - {{ enrollment.course.title }}</td>
+                            <td>{{ enrollment.semester }}</td>
+                            <td>{{ enrollment.year }}</td>
+                            <td>{{ enrollment.grade|default:"N/A" }}</td>
+                            <td>{{ enrollment.enrollment_date }}</td>
+                            <td>
+                                <a href="{% url 'enrollment-detail' enrollment.id %}" class="btn btn-sm btn-info">
+                                    <i class="fas fa-eye"></i>
+                                </a>
+                                {% if user.is_authenticated %}
+                                <a href="{% url 'enrollment-update' enrollment.id %}" class="btn btn-sm btn-warning">
+                                    <i class="fas fa-edit"></i>
+                                </a>
+                                <a href="{% url 'enrollment-delete' enrollment.id %}" class="btn btn-sm btn-danger">
+                                    <i class="fas fa-trash"></i>
+                                </a>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="7" class="text-center">No enrollments found</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

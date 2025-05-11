@@ -1,0 +1,95 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ course.title }} - SEAS{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1>{{ course.course_code }} - {{ course.title }}</h1>
+        <div>
+            {% if user.is_authenticated %}
+            <a href="{% url 'course-update' course.id %}" class="btn btn-warning">
+                <i class="fas fa-edit me-2"></i> Edit
+            </a>
+            <a href="{% url 'course-delete' course.id %}" class="btn btn-danger">
+                <i class="fas fa-trash me-2"></i> Delete
+            </a>
+            {% endif %}
+            <a href="{% url 'course-list' %}" class="btn btn-secondary">
+                <i class="fas fa-arrow-left me-2"></i> Back to List
+            </a>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Course Info -->
+        <div class="col-md-4 mb-4">
+            <div class="card card-dashboard h-100">
+                <div class="card-header bg-light">
+                    <h5 class="card-title mb-0">Course Information</h5>
+                </div>
+                <div class="card-body">
+                    <p><strong>Course Code:</strong> {{ course.course_code }}</p>
+                    <p><strong>Title:</strong> {{ course.title }}</p>
+                    <p><strong>Department:</strong> <a href="{% url 'department-detail' course.department.id %}">{{ course.department.code }} - {{ course.department.name }}</a></p>
+                    <p><strong>Credit Hours:</strong> {{ course.credit_hours }}</p>
+                    <p><strong>Total Enrollments:</strong> {{ enrollments.count }}</p>
+                    {% if course.description %}
+                    <p><strong>Description:</strong></p>
+                    <div class="card">
+                        <div class="card-body bg-light">
+                            {{ course.description|linebreaks }}
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Enrollments -->
+        <div class="col-md-8 mb-4">
+            <div class="card card-dashboard h-100">
+                <div class="card-header bg-light">
+                    <h5 class="card-title mb-0">Enrollments</h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Student ID</th>
+                                    <th>Student Name</th>
+                                    <th>Semester</th>
+                                    <th>Year</th>
+                                    <th>Grade</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for enrollment in enrollments %}
+                                <tr>
+                                    <td>{{ enrollment.student.student_id }}</td>
+                                    <td>{{ enrollment.student.full_name }}</td>
+                                    <td>{{ enrollment.semester }}</td>
+                                    <td>{{ enrollment.year }}</td>
+                                    <td>{{ enrollment.grade|default:"N/A" }}</td>
+                                    <td>
+                                        <a href="{% url 'enrollment-detail' enrollment.id %}" class="btn btn-sm btn-info">
+                                            <i class="fas fa-eye"></i>
+                                        </a>
+                                    </td>
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="6" class="text-center">No enrollments found</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

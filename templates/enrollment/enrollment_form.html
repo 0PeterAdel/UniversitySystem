@@ -1,0 +1,98 @@
+{% extends 'base.html' %}
+{% load form_tags %}
+
+{% block title %}
+    {% if form.instance.id %}Edit Enrollment{% else %}New Enrollment{% endif %} - SEAS
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1>{% if form.instance.id %}Edit Enrollment{% else %}New Enrollment{% endif %}</h1>
+        <a href="{% url 'enrollment-list' %}" class="btn btn-secondary">
+            <i class="fas fa-arrow-left me-2"></i> Back to List
+        </a>
+    </div>
+
+    <div class="card card-dashboard">
+        <div class="card-header bg-light">
+            <h5 class="card-title mb-0">Enrollment Information</h5>
+        </div>
+        <div class="card-body">
+            <form method="post">
+                {% csrf_token %}
+                
+                <div class="mb-3">
+                    <label for="id_student" class="form-label">Student</label>
+                    {{ form.student|add_class:"form-select" }}
+                    {% if form.student.errors %}
+                        <div class="text-danger">
+                            {{ form.student.errors }}
+                        </div>
+                    {% endif %}
+                </div>
+                
+                <div class="mb-3">
+                    <label for="id_course" class="form-label">Course</label>
+                    {{ form.course|add_class:"form-select" }}
+                    {% if form.course.errors %}
+                        <div class="text-danger">
+                            {{ form.course.errors }}
+                        </div>
+                    {% endif %}
+                </div>
+                
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label for="id_semester" class="form-label">Semester</label>
+                        {{ form.semester|add_class:"form-select" }}
+                        {% if form.semester.errors %}
+                            <div class="text-danger">
+                                {{ form.semester.errors }}
+                            </div>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="col-md-6 mb-3">
+                        <label for="id_year" class="form-label">Year</label>
+                        {{ form.year|add_class:"form-control" }}
+                        {% if form.year.errors %}
+                            <div class="text-danger">
+                                {{ form.year.errors }}
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label for="id_grade" class="form-label">Grade</label>
+                        {{ form.grade|add_class:"form-select" }}
+                        {% if form.grade.errors %}
+                            <div class="text-danger">
+                                {{ form.grade.errors }}
+                            </div>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="col-md-6 mb-3">
+                        <label for="id_enrollment_date" class="form-label">Enrollment Date</label>
+                        {{ form.enrollment_date|add_class:"form-control" }}
+                        {% if form.enrollment_date.errors %}
+                            <div class="text-danger">
+                                {{ form.enrollment_date.errors }}
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save me-2"></i> Save
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

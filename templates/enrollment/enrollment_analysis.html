@@ -5,11 +5,17 @@
 
 {% block content %}
 <div class="container-fluid">
-    <h1 class="mb-4">Enrollment Analysis</h1>
-    
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1>Enrollment Analysis</h1>
+        <a href="{% url 'analysis-dashboard' %}" class="btn btn-secondary">
+            <i class="fas fa-arrow-left me-2"></i> Back to Dashboard
+        </a>
+    </div>
+
     <div class="row">
-        <div class="col-md-4">
-            <div class="card card-dashboard mb-4">
+        <!-- Analysis Parameters -->
+        <div class="col-md-4 mb-4">
+            <div class="card card-dashboard h-100">
                 <div class="card-header bg-light">
                     <h5 class="card-title mb-0">Analysis Parameters</h5>
                 </div>
@@ -17,7 +23,6 @@
                     <form method="get" action="{% url 'enrollment-analysis' %}">
                         <div class="mb-3">
                             <label for="id_analysis_type" class="form-label">Analysis Type</label>
-                            {{ form.analysis_type.label_tag }}
                             {{ form.analysis_type|add_class:"form-select" }}
                         </div>
                         
@@ -44,33 +49,80 @@
             </div>
         </div>
         
-        <div class="col-md-8">
-            <div class="card card-dashboard">
+        <!-- Analysis Results -->
+        <div class="col-md-8 mb-4">
+            <div class="card card-dashboard h-100">
                 <div class="card-header bg-light">
                     <h5 class="card-title mb-0">Analysis Results</h5>
                 </div>
                 <div class="card-body">
-                    <canvas id="analysisChart"></canvas>
+                    <div class="chart-container" style="position: relative; height:400px;">
+                        <canvas id="analysisChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Enrollment Summary -->
+        <div class="col-md-12 mb-4">
+            <div class="card card-dashboard">
+                <div class="card-header bg-light">
+                    <h5 class="card-title mb-0">Enrollment Summary</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-3 mb-4">
+                            <div class="card bg-light">
+                                <div class="card-body text-center">
+                                    <h5 class="card-title">Total Enrollments</h5>
+                                    <h2 class="display-4">{{ enrollment_count }}</h2>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3 mb-4">
+                            <div class="card bg-light">
+                                <div class="card-body text-center">
+                                    <h5 class="card-title">Average Enrollments per Student</h5>
+                                    <h2 class="display-4">{{ avg_enrollments_per_student|floatformat:1|default:"0.0" }}</h2>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3 mb-4">
+                            <div class="card bg-light">
+                                <div class="card-body text-center">
+                                    <h5 class="card-title">Average Enrollments per Course</h5>
+                                    <h2 class="display-4">{{ avg_enrollments_per_course|floatformat:1|default:"0.0" }}</h2>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3 mb-4">
+                            <div class="card bg-light">
+                                <div class="card-body text-center">
+                                    <h5 class="card-title">Average Grade</h5>
+                                    <h2 class="display-4">{{ avg_grade|default:"N/A" }}</h2>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 </div>
-{% endblock %}
 
 {% block extra_js %}
 <script>
     document.addEventListener('DOMContentLoaded', function() {
-        const analysisData = {{ analysis_data|safe }};
+        const analysisData = {{ analysis_data|safe|default:"{}" }};
         
         if (analysisData && analysisData.labels && analysisData.labels.length > 0) {
             const ctx = document.getElementById('analysisChart').getContext('2d');
             const analysisChart = new Chart(ctx, {
-                type: 'bar',
+                type: analysisData.chart_type || 'bar',
                 data: {
                     labels: analysisData.labels,
                     datasets: [{
-                        label: 'Number of Enrollments',
+                        label: analysisData.dataset_label || 'Number of Enrollments',
                         data: analysisData.data,
                         backgroundColor: [
                             'rgba(54, 162, 235, 0.7)',
@@ -78,7 +130,11 @@
                             'rgba(255, 206, 86, 0.7)',
                             'rgba(75, 192, 192, 0.7)',
                             'rgba(153, 102, 255, 0.7)',
-                            'rgba(255, 159, 64, 0.7)'
+                            'rgba(255, 159, 64, 0.7)',
+                            'rgba(199, 199, 199, 0.7)',
+                            'rgba(83, 102, 255, 0.7)',
+                            'rgba(40, 159, 64, 0.7)',
+                            'rgba(210, 199, 199, 0.7)'
                         ],
                         borderColor: [
                             'rgba(54, 162, 235, 1)',
@@ -86,13 +142,18 @@
                             'rgba(255, 206, 86, 1)',
                             'rgba(75, 192, 192, 1)',
                             'rgba(153, 102, 255, 1)',
-                            'rgba(255, 159, 64, 1)'
+                            'rgba(255, 159, 64, 1)',
+                            'rgba(199, 199, 199, 1)',
+                            'rgba(83, 102, 255, 1)',
+                            'rgba(40, 159, 64, 1)',
+                            'rgba(210, 199, 199, 1)'
                         ],
                         borderWidth: 1
                     }]
                 },
                 options: {
                     responsive: true,
+                    maintainAspectRatio: false,
                     plugins: {
                         title: {
                             display: true,
@@ -102,7 +163,8 @@
                             }
                         },
                         legend: {
-                            display: false
+                            display: analysisData.show_legend || false,
+                            position: 'top'
                         }
                     },
                     scales: {
@@ -116,8 +178,10 @@
                 }
             });
         } else {
-            document.getElementById('analysisChart').innerHTML = '<div class="text-center p-5"><p class="text-muted">Select analysis parameters and click "Generate Analysis" to view results</p></div>';
+            const chartContainer = document.querySelector('.chart-container');
+            chartContainer.innerHTML = '<div class="text-center p-5"><p class="text-muted">Select analysis parameters and click "Generate Analysis" to view results</p></div>';
         }
     });
 </script>
+{% endblock %}
 {% endblock %}

@@ -1,0 +1,55 @@
+{% extends 'base.html' %}
+
+{% block title %}Delete Enrollment - SEAS{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1>Delete Enrollment</h1>
+        <a href="{% url 'enrollment-list' %}" class="btn btn-secondary">
+            <i class="fas fa-arrow-left me-2"></i> Back to List
+        </a>
+    </div>
+
+    <div class="card card-dashboard">
+        <div class="card-header bg-danger text-white">
+            <h5 class="card-title mb-0">Confirm Deletion</h5>
+        </div>
+        <div class="card-body">
+            <p class="alert alert-warning">
+                <i class="fas fa-exclamation-triangle me-2"></i>
+                Are you sure you want to delete the enrollment for:
+            </p>
+            
+            <div class="card mb-3">
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-3"><strong>Student:</strong></div>
+                        <div class="col-md-9">{{ enrollment.student.student_id }} - {{ enrollment.student.full_name }}</div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-3"><strong>Course:</strong></div>
+                        <div class="col-md-9">{{ enrollment.course.course_code }} - {{ enrollment.course.title }}</div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-3"><strong>Semester/Year:</strong></div>
+                        <div class="col-md-9">{{ enrollment.semester }} {{ enrollment.year }}</div>
+                    </div>
+                </div>
+            </div>
+            
+            <form method="post">
+                {% csrf_token %}
+                <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                    <a href="{% url 'enrollment-list' %}" class="btn btn-secondary me-md-2">
+                        <i class="fas fa-times me-2"></i> Cancel
+                    </a>
+                    <button type="submit" class="btn btn-danger">
+                        <i class="fas fa-trash me-2"></i> Delete
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

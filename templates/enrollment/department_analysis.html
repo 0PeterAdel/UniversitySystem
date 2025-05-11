@@ -1,0 +1,241 @@
+{% extends 'base.html' %}
+
+{% block title %}Department Analysis - SEAS{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1>Department Analysis</h1>
+        <a href="{% url 'analysis-dashboard' %}" class="btn btn-secondary">
+            <i class="fas fa-arrow-left me-2"></i> Back to Dashboard
+        </a>
+    </div>
+
+    <div class="row">
+        <!-- Department Summary -->
+        <div class="col-md-12 mb-4">
+            <div class="card card-dashboard">
+                <div class="card-header bg-light">
+                    <h5 class="card-title mb-0">Department Summary</h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Department</th>
+                                    <th>Students</th>
+                                    <th>Courses</th>
+                                    <th>Enrollments</th>
+                                    <th>Avg. CGPA</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for dept in departments %}
+                                <tr>
+                                    <td>{{ dept.code }} - {{ dept.name }}</td>
+                                    <td>{{ dept.student_count }}</td>
+                                    <td>{{ dept.course_count }}</td>
+                                    <td>{{ dept.enrollment_count }}</td>
+                                    <td>{{ dept.avg_cgpa|default:"N/A" }}</td>
+                                    <td>
+                                        <a href="{% url 'department-detail' dept.id %}" class="btn btn-sm btn-info">
+                                            <i class="fas fa-eye"></i>
+                                        </a>
+                                    </td>
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="6" class="text-center">No departments found</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Department Student Distribution -->
+        <div class="col-md-6 mb-4">
+            <div class="card card-dashboard h-100">
+                <div class="card-header bg-light">
+                    <h5 class="card-title mb-0">Student Distribution by Department</h5>
+                </div>
+                <div class="card-body">
+                    <div class="chart-container" style="position: relative; height:300px;">
+                        <canvas id="studentDistributionChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Department Course Distribution -->
+        <div class="col-md-6 mb-4">
+            <div class="card card-dashboard h-100">
+                <div class="card-header bg-light">
+                    <h5 class="card-title mb-0">Course Distribution by Department</h5>
+                </div>
+                <div class="card-body">
+                    <div class="chart-container" style="position: relative; height:300px;">
+                        <canvas id="courseDistributionChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Department Performance -->
+        <div class="col-md-12 mb-4">
+            <div class="card card-dashboard">
+                <div class="card-header bg-light">
+                    <h5 class="card-title mb-0">Department Performance</h5>
+                </div>
+                <div class="card-body">
+                    <div class="chart-container" style="position: relative; height:400px;">
+                        <canvas id="departmentPerformanceChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Student Distribution Chart
+        const studentCtx = document.getElementById('studentDistributionChart').getContext('2d');
+        const studentChart = new Chart(studentCtx, {
+            type: 'pie',
+            data: {
+                labels: [{% for dept in departments %}'{{ dept.code }}',{% endfor %}],
+                datasets: [{
+                    data: [{% for dept in departments %}{{ dept.student_count }},{% endfor %}],
+                    backgroundColor: [
+                        'rgba(255, 99, 132, 0.7)',
+                        'rgba(54, 162, 235, 0.7)',
+                        'rgba(255, 206, 86, 0.7)',
+                        'rgba(75, 192, 192, 0.7)',
+                        'rgba(153, 102, 255, 0.7)',
+                        'rgba(255, 159, 64, 0.7)',
+                        'rgba(199, 199, 199, 0.7)',
+                        'rgba(83, 102, 255, 0.7)',
+                        'rgba(40, 159, 64, 0.7)',
+                        'rgba(210, 199, 199, 0.7)',
+                    ],
+                    borderColor: [
+                        'rgba(255, 99, 132, 1)',
+                        'rgba(54, 162, 235, 1)',
+                        'rgba(255, 206, 86, 1)',
+                        'rgba(75, 192, 192, 1)',
+                        'rgba(153, 102, 255, 1)',
+                        'rgba(255, 159, 64, 1)',
+                        'rgba(199, 199, 199, 1)',
+                        'rgba(83, 102, 255, 1)',
+                        'rgba(40, 159, 64, 1)',
+                        'rgba(210, 199, 199, 1)',
+                    ],
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'right',
+                    },
+                    title: {
+                        display: true,
+                        text: 'Student Distribution'
+                    }
+                }
+            }
+        });
+        
+        // Course Distribution Chart
+        const courseCtx = document.getElementById('courseDistributionChart').getContext('2d');
+        const courseChart = new Chart(courseCtx, {
+            type: 'pie',
+            data: {
+                labels: [{% for dept in departments %}'{{ dept.code }}',{% endfor %}],
+                datasets: [{
+                    data: [{% for dept in departments %}{{ dept.course_count }},{% endfor %}],
+                    backgroundColor: [
+                        'rgba(255, 99, 132, 0.7)',
+                        'rgba(54, 162, 235, 0.7)',
+                        'rgba(255, 206, 86, 0.7)',
+                        'rgba(75, 192, 192, 0.7)',
+                        'rgba(153, 102, 255, 0.7)',
+                        'rgba(255, 159, 64, 0.7)',
+                        'rgba(199, 199, 199, 0.7)',
+                        'rgba(83, 102, 255, 0.7)',
+                        'rgba(40, 159, 64, 0.7)',
+                        'rgba(210, 199, 199, 0.7)',
+                    ],
+                    borderColor: [
+                        'rgba(255, 99, 132, 1)',
+                        'rgba(54, 162, 235, 1)',
+                        'rgba(255, 206, 86, 1)',
+                        'rgba(75, 192, 192, 1)',
+                        'rgba(153, 102, 255, 1)',
+                        'rgba(255, 159, 64, 1)',
+                        'rgba(199, 199, 199, 1)',
+                        'rgba(83, 102, 255, 1)',
+                        'rgba(40, 159, 64, 1)',
+                        'rgba(210, 199, 199, 1)',
+                    ],
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'right',
+                    },
+                    title: {
+                        display: true,
+                        text: 'Course Distribution'
+                    }
+                }
+            }
+        });
+        
+        // Department Performance Chart
+        const perfCtx = document.getElementById('departmentPerformanceChart').getContext('2d');
+        const perfChart = new Chart(perfCtx, {
+            type: 'bar',
+            data: {
+                labels: [{% for dept in departments %}'{{ dept.code }}',{% endfor %}],
+                datasets: [{
+                    label: 'Average CGPA',
+                    data: [{% for dept in departments %}{{ dept.avg_cgpa|default:0 }},{% endfor %}],
+                    backgroundColor: 'rgba(54, 162, 235, 0.7)',
+                    borderColor: 'rgba(54, 162, 235, 1)',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        max: 4.0
+                    }
+                },
+                plugins: {
+                    title: {
+                        display: true,
+                        text: 'Average CGPA by Department'
+                    }
+                }
+            }
+        });
+    });
+</script>
+{% endblock %}
+{% endblock %}

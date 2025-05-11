@@ -1,54 +1,52 @@
 {% extends 'base.html' %}
 
-{% block title %}Students - SEAS{% endblock %}
+{% block title %}Courses - SEAS{% endblock %}
 
 {% block content %}
 <div class="container-fluid">
     <div class="d-flex justify-content-between align-items-center mb-4">
-        <h1>Students</h1>
+        <h1>Courses</h1>
         {% if user.is_authenticated %}
-        <a href="{% url 'student-create' %}" class="btn btn-primary">
-            <i class="fas fa-plus me-2"></i> Add Student
+        <a href="{% url 'course-create' %}" class="btn btn-primary">
+            <i class="fas fa-plus me-2"></i> Add Course
         </a>
         {% endif %}
     </div>
 
     <div class="card card-dashboard">
         <div class="card-header bg-light">
-            <h5 class="card-title mb-0">Student List</h5>
+            <h5 class="card-title mb-0">Course List</h5>
         </div>
         <div class="card-body">
             <div class="table-responsive">
                 <table class="table table-hover">
                     <thead>
                         <tr>
-                            <th>Student ID</th>
-                            <th>Name</th>
+                            <th>Code</th>
+                            <th>Title</th>
                             <th>Department</th>
-                            <th>Email</th>
-                            <th>CGPA</th>
+                            <th>Credit Hours</th>
                             <th>Enrollments</th>
                             <th>Actions</th>
                         </tr>
                     </thead>
                     <tbody>
-                        {% for student in students %}
+                        {% for course in courses %}
                         <tr>
-                            <td>{{ student.student_id }}</td>
-                            <td>{{ student.full_name }}</td>
-                            <td>{{ student.department.code }}</td>
-                            <td>{{ student.email }}</td>
-                            <td>{{ student.cgpa|default:"N/A" }}</td>
-                            <td>{{ student.enrollments.count }}</td>
+                            <td>{{ course.course_code }}</td>
+                            <td>{{ course.title }}</td>
+                            <td>{{ course.department.code }}</td>
+                            <td>{{ course.credit_hours }}</td>
+                            <td>{{ course.enrollments.count }}</td>
                             <td>
-                                <a href="{% url 'student-detail' student.id %}" class="btn btn-sm btn-info">
+                                <a href="{% url 'course-detail' course.id %}" class="btn btn-sm btn-info">
                                     <i class="fas fa-eye"></i>
                                 </a>
                                 {% if user.is_authenticated %}
-                                <a href="{% url 'student-update' student.id %}" class="btn btn-sm btn-warning">
+                                <a href="{% url 'course-update' course.id %}" class="btn btn-sm btn-warning">
                                     <i class="fas fa-edit"></i>
                                 </a>
-                                <a href="{% url 'student-delete' student.id %}" class="btn btn-sm btn-danger">
+                                <a href="{% url 'course-delete' course.id %}" class="btn btn-sm btn-danger">
                                     <i class="fas fa-trash"></i>
                                 </a>
                                 {% endif %}
@@ -56,7 +54,7 @@
                         </tr>
                         {% empty %}
                         <tr>
-                            <td colspan="7" class="text-center">No students found</td>
+                            <td colspan="6" class="text-center">No courses found</td>
                         </tr>
                         {% endfor %}
                     </tbody>

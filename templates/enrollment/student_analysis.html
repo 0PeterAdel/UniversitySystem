@@ -1,0 +1,262 @@
+{% extends 'base.html' %}
+
+{% block title %}Student Analysis - SEAS{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1>Student Analysis</h1>
+        <a href="{% url 'analysis-dashboard' %}" class="btn btn-secondary">
+            <i class="fas fa-arrow-left me-2"></i> Back to Dashboard
+        </a>
+    </div>
+
+    <div class="row">
+        <!-- Student Summary -->
+        <div class="col-md-12 mb-4">
+            <div class="card card-dashboard">
+                <div class="card-header bg-light">
+                    <h5 class="card-title mb-0">Student Performance Summary</h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Student ID</th>
+                                    <th>Name</th>
+                                    <th>Department</th>
+                                    <th>Enrollments</th>
+                                    <th>CGPA</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for student in top_students %}
+                                <tr>
+                                    <td>{{ student.student_id }}</td>
+                                    <td>{{ student.full_name }}</td>
+                                    <td>{{ student.department.code }}</td>
+                                    <td>{{ student.enrollment_count }}</td>
+                                    <td>{{ student.cgpa|default:"N/A" }}</td>
+                                    <td>
+                                        <a href="{% url 'student-detail' student.id %}" class="btn btn-sm btn-info">
+                                            <i class="fas fa-eye"></i>
+                                        </a>
+                                    </td>
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="6" class="text-center">No students found</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- CGPA Distribution -->
+        <div class="col-md-6 mb-4">
+            <div class="card card-dashboard h-100">
+                <div class="card-header bg-light">
+                    <h5 class="card-title mb-0">CGPA Distribution</h5>
+                </div>
+                <div class="card-body">
+                    <div class="chart-container" style="position: relative; height:300px;">
+                        <canvas id="cgpaDistributionChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Top Performing Students -->
+        <div class="col-md-6 mb-4">
+            <div class="card card-dashboard h-100">
+                <div class="card-header bg-light">
+                    <h5 class="card-title mb-0">Top Performing Students</h5>
+                </div>
+                <div class="card-body">
+                    <div class="chart-container" style="position: relative; height:300px;">
+                        <canvas id="topStudentsChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Department-wise Student Performance -->
+        <div class="col-md-12 mb-4">
+            <div class="card card-dashboard">
+                <div class="card-header bg-light">
+                    <h5 class="card-title mb-0">Department-wise Student Performance</h5>
+                </div>
+                <div class="card-body">
+                    <div class="chart-container" style="position: relative; height:400px;">
+                        <canvas id="deptPerformanceChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // CGPA Distribution Chart
+        const cgpaCtx = document.getElementById('cgpaDistributionChart').getContext('2d');
+        const cgpaChart = new Chart(cgpaCtx, {
+            type: 'bar',
+            data: {
+                labels: ['0.0-0.5', '0.5-1.0', '1.0-1.5', '1.5-2.0', '2.0-2.5', '2.5-3.0', '3.0-3.5', '3.5-4.0'],
+                datasets: [{
+                    label: 'Number of Students',
+                    data: [
+                        {{ cgpa_distribution.range_0_0_5|default:0 }},
+                        {{ cgpa_distribution.range_0_5_1_0|default:0 }},
+                        {{ cgpa_distribution.range_1_0_1_5|default:0 }},
+                        {{ cgpa_distribution.range_1_5_2_0|default:0 }},
+                        {{ cgpa_distribution.range_2_0_2_5|default:0 }},
+                        {{ cgpa_distribution.range_2_5_3_0|default:0 }},
+                        {{ cgpa_distribution.range_3_0_3_5|default:0 }},
+                        {{ cgpa_distribution.range_3_5_4_0|default:0 }}
+                    ],
+                    backgroundColor: [
+                        'rgba(255, 99, 132, 0.7)',
+                        'rgba(255, 159, 64, 0.7)',
+                        'rgba(255, 205, 86, 0.7)',
+                        'rgba(75, 192, 192, 0.5)',
+                        'rgba(75, 192, 192, 0.6)',
+                        'rgba(75, 192, 192, 0.7)',
+                        'rgba(54, 162, 235, 0.6)',
+                        'rgba(54, 162, 235, 0.7)'
+                    ],
+                    borderColor: [
+                        'rgba(255, 99, 132, 1)',
+                        'rgba(255, 159, 64, 1)',
+                        'rgba(255, 205, 86, 1)',
+                        'rgba(75, 192, 192, 1)',
+                        'rgba(75, 192, 192, 1)',
+                        'rgba(75, 192, 192, 1)',
+                        'rgba(54, 162, 235, 1)',
+                        'rgba(54, 162, 235, 1)'
+                    ],
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                },
+                plugins: {
+                    title: {
+                        display: true,
+                        text: 'CGPA Distribution'
+                    }
+                }
+            }
+        });
+        
+        // Top Students Chart
+        const topStudentsCtx = document.getElementById('topStudentsChart').getContext('2d');
+        const topStudentsChart = new Chart(topStudentsCtx, {
+            type: 'bar',
+            data: {
+                labels: [{% for student in top_students|slice:":10" %}'{{ student.student_id }}',{% endfor %}],
+                datasets: [{
+                    label: 'CGPA',
+                    data: [{% for student in top_students|slice:":10" %}{{ student.cgpa|default:0 }},{% endfor %}],
+                    backgroundColor: 'rgba(54, 162, 235, 0.7)',
+                    borderColor: 'rgba(54, 162, 235, 1)',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        max: 4.0
+                    }
+                },
+                plugins: {
+                    title: {
+                        display: true,
+                        text: 'Top Performing Students'
+                    }
+                }
+            }
+        });
+        
+        // Department Performance Chart
+        const deptPerfCtx = document.getElementById('deptPerformanceChart').getContext('2d');
+        const deptPerfChart = new Chart(deptPerfCtx, {
+            type: 'bar',
+            data: {
+                labels: [{% for dept in departments %}'{{ dept.code }}',{% endfor %}],
+                datasets: [
+                    {
+                        label: 'Average CGPA',
+                        data: [{% for dept in departments %}{{ dept.avg_cgpa|default:0 }},{% endfor %}],
+                        backgroundColor: 'rgba(75, 192, 192, 0.7)',
+                        borderColor: 'rgba(75, 192, 192, 1)',
+                        borderWidth: 1,
+                        yAxisID: 'y'
+                    },
+                    {
+                        label: 'Number of Students',
+                        data: [{% for dept in departments %}{{ dept.student_count }},{% endfor %}],
+                        backgroundColor: 'rgba(153, 102, 255, 0.7)',
+                        borderColor: 'rgba(153, 102, 255, 1)',
+                        borderWidth: 1,
+                        yAxisID: 'y1'
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: {
+                        type: 'linear',
+                        display: true,
+                        position: 'left',
+                        beginAtZero: true,
+                        max: 4.0,
+                        title: {
+                            display: true,
+                            text: 'Average CGPA'
+                        }
+                    },
+                    y1: {
+                        type: 'linear',
+                        display: true,
+                        position: 'right',
+                        beginAtZero: true,
+                        grid: {
+                            drawOnChartArea: false
+                        },
+                        title: {
+                            display: true,
+                            text: 'Number of Students'
+                        }
+                    }
+                },
+                plugins: {
+                    title: {
+                        display: true,
+                        text: 'Department-wise Student Performance'
+                    }
+                }
+            }
+        });
+    });
+</script>
+{% endblock %}
+{% endblock %}

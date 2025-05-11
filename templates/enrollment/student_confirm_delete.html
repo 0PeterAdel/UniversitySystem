@@ -1,0 +1,42 @@
+{% extends 'base.html' %}
+
+{% block title %}Delete Student - SEAS{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1>Delete Student</h1>
+        <a href="{% url 'student-list' %}" class="btn btn-secondary">
+            <i class="fas fa-arrow-left me-2"></i> Back to List
+        </a>
+    </div>
+
+    <div class="card card-dashboard">
+        <div class="card-header bg-danger text-white">
+            <h5 class="card-title mb-0">Confirm Deletion</h5>
+        </div>
+        <div class="card-body">
+            <p class="alert alert-warning">
+                <i class="fas fa-exclamation-triangle me-2"></i>
+                Are you sure you want to delete the student <strong>{{ student.student_id }} - {{ student.full_name }}</strong>?
+            </p>
+            <p class="alert alert-danger">
+                <i class="fas fa-exclamation-circle me-2"></i>
+                This action will also delete all related enrollments!
+            </p>
+            
+            <form method="post">
+                {% csrf_token %}
+                <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                    <a href="{% url 'student-list' %}" class="btn btn-secondary me-md-2">
+                        <i class="fas fa-times me-2"></i> Cancel
+                    </a>
+                    <button type="submit" class="btn btn-danger">
+                        <i class="fas fa-trash me-2"></i> Delete
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

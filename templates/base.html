@@ -76,6 +76,10 @@
                             Analysis
                         </a>
                         <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="{% url 'analysis-dashboard' %}">Analysis Dashboard</a></li>
+                            <li><a class="dropdown-item" href="{% url 'department-analysis' %}">Department Analysis</a></li>
+                            <li><a class="dropdown-item" href="{% url 'course-analysis' %}">Course Analysis</a></li>
+                            <li><a class="dropdown-item" href="{% url 'student-analysis' %}">Student Analysis</a></li>
                             <li><a class="dropdown-item" href="{% url 'enrollment-analysis' %}">Enrollment Analysis</a></li>
                             <li><a class="dropdown-item" href="{% url 'student-performance' %}">Student Performance</a></li>
                             <li><a class="dropdown-item" href="{% url 'course-popularity' %}">Course Popularity</a></li>
@@ -134,18 +138,38 @@
                         </a>
                     </li>
                     <li class="nav-item">
+                        <a href="{% url 'analysis-dashboard' %}" class="nav-link">
+                            <i class="fas fa-chart-pie me-2"></i> Analysis Dashboard
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="{% url 'department-analysis' %}" class="nav-link">
+                            <i class="fas fa-building me-2"></i> Department Analysis
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="{% url 'course-analysis' %}" class="nav-link">
+                            <i class="fas fa-book me-2"></i> Course Analysis
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="{% url 'student-analysis' %}" class="nav-link">
+                            <i class="fas fa-user-graduate me-2"></i> Student Analysis
+                        </a>
+                    </li>
+                    <li class="nav-item">
                         <a href="{% url 'enrollment-analysis' %}" class="nav-link">
                             <i class="fas fa-chart-bar me-2"></i> Enrollment Analysis
                         </a>
                     </li>
                     <li class="nav-item">
                         <a href="{% url 'student-performance' %}" class="nav-link">
-                            <i class="fas fa-chart-line me-2"></i> Student Performance
+                            <i class="fas fa-user-graduate me-2"></i> Student Performance
                         </a>
                     </li>
                     <li class="nav-item">
                         <a href="{% url 'course-popularity' %}" class="nav-link">
-                            <i class="fas fa-fire me-2"></i> Course Popularity
+                            <i class="fas fa-star me-2"></i> Course Popularity
                         </a>
                     </li>
                 </ul>

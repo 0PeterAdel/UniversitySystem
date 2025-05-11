@@ -1,0 +1,84 @@
+{% extends 'base.html' %}
+{% load form_tags %}
+
+{% block title %}
+    {% if form.instance.id %}Edit Course{% else %}New Course{% endif %} - SEAS
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1>{% if form.instance.id %}Edit Course{% else %}New Course{% endif %}</h1>
+        <a href="{% url 'course-list' %}" class="btn btn-secondary">
+            <i class="fas fa-arrow-left me-2"></i> Back to List
+        </a>
+    </div>
+
+    <div class="card card-dashboard">
+        <div class="card-header bg-light">
+            <h5 class="card-title mb-0">Course Information</h5>
+        </div>
+        <div class="card-body">
+            <form method="post">
+                {% csrf_token %}
+                
+                <div class="mb-3">
+                    <label for="id_course_code" class="form-label">Course Code</label>
+                    {{ form.course_code|add_class:"form-control" }}
+                    {% if form.course_code.errors %}
+                        <div class="text-danger">
+                            {{ form.course_code.errors }}
+                        </div>
+                    {% endif %}
+                </div>
+                
+                <div class="mb-3">
+                    <label for="id_title" class="form-label">Title</label>
+                    {{ form.title|add_class:"form-control" }}
+                    {% if form.title.errors %}
+                        <div class="text-danger">
+                            {{ form.title.errors }}
+                        </div>
+                    {% endif %}
+                </div>
+                
+                <div class="mb-3">
+                    <label for="id_department" class="form-label">Department</label>
+                    {{ form.department|add_class:"form-select" }}
+                    {% if form.department.errors %}
+                        <div class="text-danger">
+                            {{ form.department.errors }}
+                        </div>
+                    {% endif %}
+                </div>
+                
+                <div class="mb-3">
+                    <label for="id_credit_hours" class="form-label">Credit Hours</label>
+                    {{ form.credit_hours|add_class:"form-control" }}
+                    {% if form.credit_hours.errors %}
+                        <div class="text-danger">
+                            {{ form.credit_hours.errors }}
+                        </div>
+                    {% endif %}
+                </div>
+                
+                <div class="mb-3">
+                    <label for="id_description" class="form-label">Description</label>
+                    {{ form.description|add_class:"form-control" }}
+                    {% if form.description.errors %}
+                        <div class="text-danger">
+                            {{ form.description.errors }}
+                        </div>
+                    {% endif %}
+                </div>
+                
+                <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save me-2"></i> Save
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

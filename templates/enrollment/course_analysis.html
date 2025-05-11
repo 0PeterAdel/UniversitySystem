@@ -1,0 +1,247 @@
+{% extends 'base.html' %}
+
+{% block title %}Course Analysis - SEAS{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1>Course Analysis</h1>
+        <a href="{% url 'analysis-dashboard' %}" class="btn btn-secondary">
+            <i class="fas fa-arrow-left me-2"></i> Back to Dashboard
+        </a>
+    </div>
+
+    <div class="row">
+        <!-- Course Summary -->
+        <div class="col-md-12 mb-4">
+            <div class="card card-dashboard">
+                <div class="card-header bg-light">
+                    <h5 class="card-title mb-0">Course Summary</h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Course Code</th>
+                                    <th>Title</th>
+                                    <th>Department</th>
+                                    <th>Credit Hours</th>
+                                    <th>Enrollments</th>
+                                    <th>Avg. Grade</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for course in courses %}
+                                <tr>
+                                    <td>{{ course.course_code }}</td>
+                                    <td>{{ course.title }}</td>
+                                    <td>{{ course.department.code }}</td>
+                                    <td>{{ course.credit_hours }}</td>
+                                    <td>{{ course.enrollment_count }}</td>
+                                    <td>{{ course.avg_grade|default:"N/A" }}</td>
+                                    <td>
+                                        <a href="{% url 'course-detail' course.id %}" class="btn btn-sm btn-info">
+                                            <i class="fas fa-eye"></i>
+                                        </a>
+                                    </td>
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="7" class="text-center">No courses found</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Top Enrolled Courses -->
+        <div class="col-md-6 mb-4">
+            <div class="card card-dashboard h-100">
+                <div class="card-header bg-light">
+                    <h5 class="card-title mb-0">Top Enrolled Courses</h5>
+                </div>
+                <div class="card-body">
+                    <div class="chart-container" style="position: relative; height:300px;">
+                        <canvas id="topEnrolledChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Course Performance -->
+        <div class="col-md-6 mb-4">
+            <div class="card card-dashboard h-100">
+                <div class="card-header bg-light">
+                    <h5 class="card-title mb-0">Course Performance</h5>
+                </div>
+                <div class="card-body">
+                    <div class="chart-container" style="position: relative; height:300px;">
+                        <canvas id="coursePerformanceChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Grade Distribution -->
+        <div class="col-md-12 mb-4">
+            <div class="card card-dashboard">
+                <div class="card-header bg-light">
+                    <h5 class="card-title mb-0">Grade Distribution</h5>
+                </div>
+                <div class="card-body">
+                    <div class="chart-container" style="position: relative; height:400px;">
+                        <canvas id="gradeDistributionChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Top Enrolled Courses Chart
+        const enrolledCtx = document.getElementById('topEnrolledChart').getContext('2d');
+        const enrolledChart = new Chart(enrolledCtx, {
+            type: 'bar',
+            data: {
+                labels: [{% for course in top_courses %}'{{ course.course_code }}',{% endfor %}],
+                datasets: [{
+                    label: 'Enrollments',
+                    data: [{% for course in top_courses %}{{ course.enrollment_count }},{% endfor %}],
+                    backgroundColor: 'rgba(75, 192, 192, 0.7)',
+                    borderColor: 'rgba(75, 192, 192, 1)',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                },
+                plugins: {
+                    title: {
+                        display: true,
+                        text: 'Top Enrolled Courses'
+                    }
+                }
+            }
+        });
+        
+        // Course Performance Chart
+        const perfCtx = document.getElementById('coursePerformanceChart').getContext('2d');
+        const perfChart = new Chart(perfCtx, {
+            type: 'bar',
+            data: {
+                labels: [{% for course in top_courses %}'{{ course.course_code }}',{% endfor %}],
+                datasets: [{
+                    label: 'Average Grade (GPA)',
+                    data: [{% for course in top_courses %}{{ course.avg_grade_value|default:0 }},{% endfor %}],
+                    backgroundColor: 'rgba(54, 162, 235, 0.7)',
+                    borderColor: 'rgba(54, 162, 235, 1)',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        max: 4.0
+                    }
+                },
+                plugins: {
+                    title: {
+                        display: true,
+                        text: 'Average Grade by Course'
+                    }
+                }
+            }
+        });
+        
+        // Grade Distribution Chart
+        const gradeCtx = document.getElementById('gradeDistributionChart').getContext('2d');
+        const gradeChart = new Chart(gradeCtx, {
+            type: 'bar',
+            data: {
+                labels: ['A', 'A-', 'B+', 'B', 'B-', 'C+', 'C', 'C-', 'D+', 'D', 'F', 'W', 'I'],
+                datasets: [{
+                    label: 'Number of Students',
+                    data: [
+                        {{ grade_distribution.A|default:0 }},
+                        {{ grade_distribution.A_minus|default:0 }},
+                        {{ grade_distribution.B_plus|default:0 }},
+                        {{ grade_distribution.B|default:0 }},
+                        {{ grade_distribution.B_minus|default:0 }},
+                        {{ grade_distribution.C_plus|default:0 }},
+                        {{ grade_distribution.C|default:0 }},
+                        {{ grade_distribution.C_minus|default:0 }},
+                        {{ grade_distribution.D_plus|default:0 }},
+                        {{ grade_distribution.D|default:0 }},
+                        {{ grade_distribution.F|default:0 }},
+                        {{ grade_distribution.W|default:0 }},
+                        {{ grade_distribution.I|default:0 }}
+                    ],
+                    backgroundColor: [
+                        'rgba(75, 192, 192, 0.7)',  // A
+                        'rgba(75, 192, 192, 0.6)',  // A-
+                        'rgba(54, 162, 235, 0.7)',  // B+
+                        'rgba(54, 162, 235, 0.6)',  // B
+                        'rgba(54, 162, 235, 0.5)',  // B-
+                        'rgba(255, 206, 86, 0.7)',  // C+
+                        'rgba(255, 206, 86, 0.6)',  // C
+                        'rgba(255, 206, 86, 0.5)',  // C-
+                        'rgba(255, 159, 64, 0.7)',  // D+
+                        'rgba(255, 159, 64, 0.6)',  // D
+                        'rgba(255, 99, 132, 0.7)',  // F
+                        'rgba(153, 102, 255, 0.7)', // W
+                        'rgba(201, 203, 207, 0.7)'  // I
+                    ],
+                    borderColor: [
+                        'rgba(75, 192, 192, 1)',    // A
+                        'rgba(75, 192, 192, 1)',    // A-
+                        'rgba(54, 162, 235, 1)',    // B+
+                        'rgba(54, 162, 235, 1)',    // B
+                        'rgba(54, 162, 235, 1)',    // B-
+                        'rgba(255, 206, 86, 1)',    // C+
+                        'rgba(255, 206, 86, 1)',    // C
+                        'rgba(255, 206, 86, 1)',    // C-
+                        'rgba(255, 159, 64, 1)',    // D+
+                        'rgba(255, 159, 64, 1)',    // D
+                        'rgba(255, 99, 132, 1)',    // F
+                        'rgba(153, 102, 255, 1)',   // W
+                        'rgba(201, 203, 207, 1)'    // I
+                    ],
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                },
+                plugins: {
+                    title: {
+                        display: true,
+                        text: 'Grade Distribution Across All Courses'
+                    }
+                }
+            }
+        });
+    });
+</script>
+{% endblock %}
+{% endblock %}

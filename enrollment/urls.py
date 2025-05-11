@@ -33,6 +33,10 @@ urlpatterns = [
     path('enrollments/<int:pk>/delete/', views.EnrollmentDeleteView.as_view(), name='enrollment-delete'),
     
     # Analysis URLs
+    path('analysis/dashboard/', views.analysis_dashboard, name='analysis-dashboard'),
+    path('analysis/departments/', views.department_analysis, name='department-analysis'),
+    path('analysis/courses/', views.course_analysis, name='course-analysis'),
+    path('analysis/students/', views.student_analysis, name='student-analysis'),
     path('analysis/enrollment/', views.enrollment_analysis, name='enrollment-analysis'),
     path('analysis/student-performance/', views.student_performance, name='student-performance'),
     path('analysis/course-popularity/', views.course_popularity, name='course-popularity'),
