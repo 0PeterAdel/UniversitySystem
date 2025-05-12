@@ -1,0 +1,99 @@
+{% extends "admin/change_form.html" %}
+{% load i18n %}
+
+{% block extrahead %}
+{{ block.super }}
+<style>
+    .password-strength-meter {
+        height: 10px;
+        margin-top: 5px;
+        margin-bottom: 10px;
+        border-radius: 3px;
+        transition: width 0.3s;
+    }
+    .password-strength-text {
+        font-size: 12px;
+        margin-bottom: 15px;
+    }
+    .strength-weak {
+        background-color: #dc3545;
+        width: 25%;
+    }
+    .strength-medium {
+        background-color: #ffc107;
+        width: 50%;
+    }
+    .strength-strong {
+        background-color: #28a745;
+        width: 75%;
+    }
+    .strength-very-strong {
+        background-color: #20c997;
+        width: 100%;
+    }
+</style>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const passwordField = document.getElementById('id_password1');
+        if (passwordField) {
+            // Create password strength elements
+            const meterContainer = document.createElement('div');
+            meterContainer.innerHTML = `
+                <div class="password-strength-meter"></div>
+                <div class="password-strength-text"></div>
+            `;
+            
+            // Insert after password field
+            passwordField.parentNode.insertBefore(meterContainer, passwordField.nextSibling);
+            
+            const strengthMeter = meterContainer.querySelector('.password-strength-meter');
+            const strengthText = meterContainer.querySelector('.password-strength-text');
+            
+            // Check password strength
+            passwordField.addEventListener('input', function() {
+                const password = this.value;
+                const result = checkPasswordStrength(password);
+                
+                // Update meter
+                strengthMeter.className = 'password-strength-meter';
+                if (password) {
+                    strengthMeter.classList.add('strength-' + result.strength);
+                }
+                
+                // Update text
+                strengthText.textContent = result.message;
+            });
+        }
+        
+        // Password strength checker
+        function checkPasswordStrength(password) {
+            if (!password) {
+                return { strength: 'weak', message: '' };
+            }
+            
+            let strength = 0;
+            
+            // Length check
+            if (password.length >= 8) strength += 1;
+            if (password.length >= 12) strength += 1;
+            
+            // Character type checks
+            if (/[A-Z]/.test(password)) strength += 1;
+            if (/[a-z]/.test(password)) strength += 1;
+            if (/[0-9]/.test(password)) strength += 1;
+            if (/[^A-Za-z0-9]/.test(password)) strength += 1;
+            
+            // Return result
+            if (strength < 3) {
+                return { strength: 'weak', message: 'Weak: Please use a stronger password' };
+            } else if (strength < 5) {
+                return { strength: 'medium', message: 'Medium: Add more character types for a stronger password' };
+            } else if (strength < 7) {
+                return { strength: 'strong', message: 'Strong: Good password!' };
+            } else {
+                return { strength: 'very-strong', message: 'Very Strong: Excellent password!' };
+            }
+        }
+    });
+</script>
+{% endblock %}

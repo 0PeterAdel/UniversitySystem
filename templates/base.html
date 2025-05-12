@@ -181,7 +181,7 @@
                         <span class="nav-link">Welcome, {{ user.username }}</span>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="{% url 'logout' %}">Logout</a>
+                        <a class="nav-link" href="#" id="logout-link">Logout</a>
                     </li>
                     {% else %}
                     <li class="nav-item">
@@ -304,6 +304,45 @@
         </div>
     </div>
     
+    <!-- Logout Confirmation Modal -->
+    <div class="modal fade" id="logoutModal" tabindex="-1" aria-labelledby="logoutModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="logoutModalLabel">Confirm Logout</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    Are you sure you want to logout?
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <a href="{% url 'logout' %}" class="btn btn-primary">Logout</a>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Session Timeout Modal -->
+    <div class="modal fade" id="sessionTimeoutModal" tabindex="-1" aria-labelledby="sessionTimeoutModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="sessionTimeoutModalLabel">Session Timeout Warning</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p>Your session will expire in <span id="sessionCountdown">60</span> seconds due to inactivity.</p>
+                    <p>Do you want to continue your session?</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" id="logoutNowBtn">Logout Now</button>
+                    <button type="button" class="btn btn-primary" data-bs-dismiss="modal" id="stayLoggedInBtn">Stay Logged In</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
     <!-- Footer -->
     <footer class="bg-light text-center text-muted py-3 mt-5">
         <div class="container">
@@ -365,9 +404,84 @@
             window.addEventListener('load', function() {
                 loadingSpinner.style.display = 'none';
             });
+            
+            // Logout confirmation
+            const logoutLink = document.getElementById('logout-link');
+            if (logoutLink) {
+                logoutLink.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const logoutModal = new bootstrap.Modal(document.getElementById('logoutModal'));
+                    logoutModal.show();
+                });
+            }
         });
     </script>
     
     {% block extra_js %}{% endblock %}
+    
+    {% if user.is_authenticated %}
+    <!-- Session Timeout Script -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Session timeout settings
+            const warningTimeout = 50 * 60 * 1000; // 50 minutes in milliseconds
+            const countdownDuration = 60; // 60 seconds countdown
+            let warningTimer;
+            let countdownTimer;
+            let countdownSeconds = countdownDuration;
+            
+            // Session timeout modal elements
+            const sessionTimeoutModal = new bootstrap.Modal(document.getElementById('sessionTimeoutModal'));
+            const sessionCountdown = document.getElementById('sessionCountdown');
+            const logoutNowBtn = document.getElementById('logoutNowBtn');
+            const stayLoggedInBtn = document.getElementById('stayLoggedInBtn');
+            
+            // Reset the warning timer
+            function resetWarningTimer() {
+                clearTimeout(warningTimer);
+                clearInterval(countdownTimer);
+                warningTimer = setTimeout(showWarning, warningTimeout);
+            }
+            
+            // Show the warning modal
+            function showWarning() {
+                sessionCountdown.textContent = countdownDuration;
+                countdownSeconds = countdownDuration;
+                sessionTimeoutModal.show();
+                
+                // Start the countdown
+                countdownTimer = setInterval(function() {
+                    countdownSeconds--;
+                    sessionCountdown.textContent = countdownSeconds;
+                    
+                    if (countdownSeconds <= 0) {
+                        clearInterval(countdownTimer);
+                        window.location.href = "{% url 'logout' %}";
+                    }
+                }, 1000);
+            }
+            
+            // Event listeners for user activity
+            const events = ['mousedown', 'mousemove', 'keypress', 'scroll', 'touchstart'];
+            events.forEach(function(name) {
+                document.addEventListener(name, resetWarningTimer, true);
+            });
+            
+            // Button event listeners
+            logoutNowBtn.addEventListener('click', function() {
+                clearInterval(countdownTimer);
+                window.location.href = "{% url 'logout' %}";
+            });
+            
+            stayLoggedInBtn.addEventListener('click', function() {
+                clearInterval(countdownTimer);
+                resetWarningTimer();
+            });
+            
+            // Initialize the warning timer
+            resetWarningTimer();
+        });
+    </script>
+    {% endif %}
 </body>
 </html>

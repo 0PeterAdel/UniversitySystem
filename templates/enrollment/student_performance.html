@@ -145,7 +145,7 @@
                                     {% endif %}
                                 </td>
                                 <td>{{ student.enrollments.count }}</td>
-                                <td>{{ student.get_gender_display }}()</td>
+                                <td>{{ student.get_gender_display }}</td>
                                 <td>
                                     <a href="{% url 'student-detail' student.id %}" class="btn btn-sm btn-info">
                                         <i class="fas fa-eye"></i> View
