@@ -23,11 +23,11 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-797vx&sb&=pjp694(6s8p1-c=k-x*lwyl#4xb3mesn4eup7dgw'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
-ALLOWED_HOSTS = ['*', 'work-1-osgipxhyppffxuko.prod-runtime.all-hands.dev', 'work-2-osgipxhyppffxuko.prod-runtime.all-hands.dev']
+ALLOWED_HOSTS = ['*', 'work-1-esiuhvggelcpnfsd.prod-runtime.all-hands.dev', 'work-2-esiuhvggelcpnfsd.prod-runtime.all-hands.dev']
 
-CSRF_TRUSTED_ORIGINS = ['https://work-1-osgipxhyppffxuko.prod-runtime.all-hands.dev', 'https://work-2-osgipxhyppffxuko.prod-runtime.all-hands.dev']
+CSRF_TRUSTED_ORIGINS = ['https://work-1-esiuhvggelcpnfsd.prod-runtime.all-hands.dev', 'https://work-2-esiuhvggelcpnfsd.prod-runtime.all-hands.dev']
 
 
 # Application definition
@@ -50,6 +50,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'enrollment.middleware.ExceptionMiddleware',
 ]
 
 ROOT_URLCONF = 'seas.urls'
@@ -119,6 +120,7 @@ USE_TZ = True
 
 STATIC_URL = 'static/'
 STATICFILES_DIRS = [BASE_DIR / 'static']
+STATIC_ROOT = BASE_DIR / 'staticfiles'
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
@@ -128,3 +130,44 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 # Authentication settings
 LOGIN_URL = '/login/'
 LOGIN_REDIRECT_URL = '/'
+
+# Logging Configuration
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'formatters': {
+        'verbose': {
+            'format': '{levelname} {asctime} {module} {message}',
+            'style': '{',
+        },
+        'simple': {
+            'format': '{levelname} {message}',
+            'style': '{',
+        },
+    },
+    'handlers': {
+        'file': {
+            'level': 'ERROR',
+            'class': 'logging.FileHandler',
+            'filename': 'error.log',
+            'formatter': 'verbose',
+        },
+        'console': {
+            'level': 'INFO',
+            'class': 'logging.StreamHandler',
+            'formatter': 'simple',
+        },
+    },
+    'loggers': {
+        'django': {
+            'handlers': ['file', 'console'],
+            'level': 'INFO',
+            'propagate': True,
+        },
+        'enrollment': {
+            'handlers': ['file', 'console'],
+            'level': 'ERROR',
+            'propagate': True,
+        },
+    },
+}

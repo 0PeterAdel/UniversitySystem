@@ -1,0 +1,22 @@
+{% extends 'base.html' %}
+
+{% block title %}Server Error - SEAS{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow">
+                <div class="card-body text-center py-5">
+                    <h1 class="display-1 text-muted">500</h1>
+                    <h2 class="mb-4">Server Error</h2>
+                    <p class="lead mb-4">We're sorry, but something went wrong on our end. Our team has been notified and we're working to fix the issue.</p>
+                    <a href="{% url 'home' %}" class="btn btn-primary btn-lg">
+                        <i class="fas fa-home me-2"></i>Return to Dashboard
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
