@@ -4,6 +4,7 @@ from django.urls import reverse_lazy
 from django.db.models import Count, Avg, Q
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.contrib.auth import logout
 from django.contrib import messages
 from django.http import JsonResponse
 from django.utils import timezone
@@ -566,3 +567,7 @@ def course_popularity(request):
     }
     
     return render(request, 'enrollment/course_popularity.html', context)
+
+def custom_logout(request):
+    logout(request)
+    return redirect('login')
