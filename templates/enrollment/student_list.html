@@ -6,18 +6,35 @@
 <div class="container-fluid">
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h1>Students</h1>
-        {% if user.is_authenticated %}
-        <a href="{% url 'student-create' %}" class="btn btn-primary">
-            <i class="fas fa-plus me-2"></i> Add Student
-        </a>
-        {% endif %}
+        <div>
+            {% if user.is_authenticated %}
+            <a href="{% url 'export-students-csv' %}{% if search_query %}?search={{ search_query }}{% endif %}" class="btn btn-success me-2">
+                <i class="fas fa-file-csv me-2"></i> Export to CSV
+            </a>
+            <a href="{% url 'student-create' %}" class="btn btn-primary">
+                <i class="fas fa-plus me-2"></i> Add Student
+            </a>
+            {% endif %}
+        </div>
     </div>
 
     <div class="card card-dashboard">
         <div class="card-header bg-light">
-            <h5 class="card-title mb-0">Student List</h5>
+            <div class="d-flex justify-content-between align-items-center">
+                <h5 class="card-title mb-0">Student List</h5>
+                <form method="get" class="d-flex">
+                    <input type="text" name="search" class="form-control me-2" placeholder="Search students..." value="{{ search_query }}">
+                    <button type="submit" class="btn btn-primary">Search</button>
+                </form>
+            </div>
         </div>
         <div class="card-body">
+            {% if search_query %}
+            <div class="alert alert-info">
+                Search results for: <strong>{{ search_query }}</strong>
+                <a href="{% url 'student-list' %}" class="float-end">Clear search</a>
+            </div>
+            {% endif %}
             <div class="table-responsive">
                 <table class="table table-hover">
                     <thead>

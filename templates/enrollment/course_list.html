@@ -15,9 +15,21 @@
 
     <div class="card card-dashboard">
         <div class="card-header bg-light">
-            <h5 class="card-title mb-0">Course List</h5>
+            <div class="d-flex justify-content-between align-items-center">
+                <h5 class="card-title mb-0">Course List</h5>
+                <form method="get" class="d-flex">
+                    <input type="text" name="search" class="form-control me-2" placeholder="Search courses..." value="{{ search_query }}">
+                    <button type="submit" class="btn btn-primary">Search</button>
+                </form>
+            </div>
         </div>
         <div class="card-body">
+            {% if search_query %}
+            <div class="alert alert-info">
+                Search results for: <strong>{{ search_query }}</strong>
+                <a href="{% url 'course-list' %}" class="float-end">Clear search</a>
+            </div>
+            {% endif %}
             <div class="table-responsive">
                 <table class="table table-hover">
                     <thead>

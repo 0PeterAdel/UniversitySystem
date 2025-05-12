@@ -12,7 +12,9 @@ from .models import Department, Student, Course, Enrollment
 from .forms import DepartmentForm, StudentForm, CourseForm, EnrollmentForm, EnrollmentAnalysisForm
 
 import json
+import csv
 from datetime import datetime
+from django.http import HttpResponse
 
 def home(request):
     total_students = Student.objects.count()
@@ -89,6 +91,23 @@ class StudentListView(ListView):
     model = Student
     template_name = 'enrollment/student_list.html'
     context_object_name = 'students'
+    
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        search_query = self.request.GET.get('search', '')
+        if search_query:
+            queryset = queryset.filter(
+                Q(name__icontains=search_query) | 
+                Q(student_id__icontains=search_query) |
+                Q(email__icontains=search_query) |
+                Q(department__name__icontains=search_query)
+            )
+        return queryset
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['search_query'] = self.request.GET.get('search', '')
+        return context
 
 class StudentDetailView(DetailView):
     model = Student
@@ -135,6 +154,23 @@ class CourseListView(ListView):
     model = Course
     template_name = 'enrollment/course_list.html'
     context_object_name = 'courses'
+    
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        search_query = self.request.GET.get('search', '')
+        if search_query:
+            queryset = queryset.filter(
+                Q(title__icontains=search_query) | 
+                Q(course_code__icontains=search_query) |
+                Q(description__icontains=search_query) |
+                Q(department__name__icontains=search_query)
+            )
+        return queryset
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['search_query'] = self.request.GET.get('search', '')
+        return context
 
 class CourseDetailView(DetailView):
     model = Course
@@ -302,6 +338,42 @@ def course_analysis(request):
     
     return render(request, 'enrollment/course_analysis.html', context)
 
+@login_required
+def export_students_csv(request):
+    response = HttpResponse(content_type='text/csv')
+    response['Content-Disposition'] = 'attachment; filename="students.csv"'
+    
+    # Get query parameters for filtering
+    search_query = request.GET.get('search', '')
+    
+    # Get students with optional filtering
+    students = Student.objects.all()
+    if search_query:
+        students = students.filter(
+            Q(name__icontains=search_query) | 
+            Q(student_id__icontains=search_query) |
+            Q(email__icontains=search_query) |
+            Q(department__name__icontains=search_query)
+        )
+    
+    # Create CSV writer
+    writer = csv.writer(response)
+    writer.writerow(['Student ID', 'Name', 'Email', 'Department', 'Gender', 'Date of Birth', 'CGPA'])
+    
+    # Add student data
+    for student in students:
+        writer.writerow([
+            student.student_id,
+            student.full_name,
+            student.email,
+            student.department.name if student.department else 'N/A',
+            student.get_gender_display(),
+            student.date_of_birth.strftime('%Y-%m-%d') if student.date_of_birth else 'N/A',
+            student.cgpa
+        ])
+    
+    return response
+
 def student_analysis(request):
     # Get top students by CGPA
     top_students = Student.objects.annotate(
@@ -436,15 +508,44 @@ def enrollment_analysis(request):
 def student_performance(request):
     departments = Department.objects.all()
     department_id = request.GET.get('department')
+    sort_by = request.GET.get('sort_by', 'cgpa')  # Default sort by CGPA
     
     students = []
     if department_id:
-        students = Student.objects.filter(department_id=department_id).order_by('-cgpa')
+        students = Student.objects.filter(department_id=department_id)
+        
+        # Apply sorting
+        if sort_by == 'cgpa':
+            students = students.order_by('-cgpa')
+        elif sort_by == 'enrollments':
+            students = students.annotate(enrollment_count=Count('enrollments')).order_by('-enrollment_count')
+        elif sort_by == 'name':
+            students = students.order_by('name')
+        elif sort_by == 'id':
+            students = students.order_by('student_id')
+        
+        # Get performance metrics
+        total_students = students.count()
+        avg_cgpa = students.aggregate(Avg('cgpa'))['cgpa__avg'] or 0
+        
+        # Get grade distribution for this department
+        grade_distribution = {}
+        for grade_code, grade_name in Enrollment.GRADE_CHOICES:
+            count = Enrollment.objects.filter(student__department_id=department_id, grade=grade_code).count()
+            grade_distribution[grade_name] = count
+    else:
+        total_students = 0
+        avg_cgpa = 0
+        grade_distribution = {}
     
     context = {
         'departments': departments,
         'students': students,
-        'selected_department': department_id
+        'selected_department': department_id,
+        'sort_by': sort_by,
+        'total_students': total_students,
+        'avg_cgpa': avg_cgpa,
+        'grade_distribution': grade_distribution
     }
     
     return render(request, 'enrollment/student_performance.html', context)

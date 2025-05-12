@@ -17,6 +17,7 @@ urlpatterns = [
     path('students/new/', views.StudentCreateView.as_view(), name='student-create'),
     path('students/<int:pk>/update/', views.StudentUpdateView.as_view(), name='student-update'),
     path('students/<int:pk>/delete/', views.StudentDeleteView.as_view(), name='student-delete'),
+    path('students/export/csv/', views.export_students_csv, name='export-students-csv'),
     
     # Course URLs
     path('courses/', views.CourseListView.as_view(), name='course-list'),
