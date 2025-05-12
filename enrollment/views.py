@@ -8,12 +8,15 @@ from django.contrib.auth import logout
 from django.contrib import messages
 from django.http import JsonResponse
 from django.utils import timezone
+from django.core.files.storage import default_storage
+from django.core.files.base import ContentFile
 
-from .models import Department, Student, Course, Enrollment
+from .models import Department, Student, Course, Enrollment, UserProfile
 from .forms import DepartmentForm, StudentForm, CourseForm, EnrollmentForm, EnrollmentAnalysisForm
 
 import json
 import csv
+import os
 from datetime import datetime
 from django.http import HttpResponse
 
@@ -571,3 +574,50 @@ def course_popularity(request):
 def custom_logout(request):
     logout(request)
     return redirect('login')
+
+@login_required
+def profile_view(request):
+    """
+    View and edit user profile
+    """
+    if request.method == 'POST':
+        # Get form data
+        first_name = request.POST.get('first_name', '')
+        last_name = request.POST.get('last_name', '')
+        email = request.POST.get('email', '')
+        phone_number = request.POST.get('phone_number', '')
+        
+        # Update user information
+        request.user.first_name = first_name
+        request.user.last_name = last_name
+        request.user.email = email
+        request.user.save()
+        
+        # Update profile information
+        profile = request.user.profile
+        profile.phone_number = phone_number
+        
+        # Handle profile picture
+        if 'profile_picture' in request.FILES:
+            # Delete old picture if exists
+            if profile.profile_picture:
+                if os.path.isfile(profile.profile_picture.path):
+                    os.remove(profile.profile_picture.path)
+            
+            # Save new picture
+            profile_pic = request.FILES['profile_picture']
+            file_path = f'profile_pics/{request.user.username}_{profile_pic.name}'
+            profile.profile_picture = file_path
+            default_storage.save(file_path, ContentFile(profile_pic.read()))
+        
+        # Handle remove picture checkbox
+        if request.POST.get('remove_picture') == 'on' and profile.profile_picture:
+            if os.path.isfile(profile.profile_picture.path):
+                os.remove(profile.profile_picture.path)
+            profile.profile_picture = None
+        
+        profile.save()
+        messages.success(request, 'Profile updated successfully!')
+        return redirect('profile')
+    
+    return render(request, 'enrollment/profile.html')

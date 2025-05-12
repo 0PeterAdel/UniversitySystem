@@ -177,11 +177,15 @@
                         <span class="ms-2 text-light">Dark Mode</span>
                     </li>
                     {% if user.is_authenticated %}
-                    <li class="nav-item">
-                        <span class="nav-link">Welcome, {{ user.username }}</span>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="#" id="logout-link">Logout</a>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+                            Welcome, {{ user.username }}
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="{% url 'profile' %}"><i class="fas fa-user me-2"></i> My Profile</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item" href="#" id="logout-link"><i class="fas fa-sign-out-alt me-2"></i> Logout</a></li>
+                        </ul>
                     </li>
                     {% else %}
                     <li class="nav-item">
@@ -218,6 +222,11 @@
                         <li><a class="dropdown-item" href="{% url 'enrollment-analysis' %}"><i class="fas fa-chart-bar me-2"></i> Enrollment Analysis</a></li>
                         <li><a class="dropdown-item" href="{% url 'student-performance' %}"><i class="fas fa-user-graduate me-2"></i> Student Performance</a></li>
                         <li><a class="dropdown-item" href="{% url 'course-popularity' %}"><i class="fas fa-star me-2"></i> Course Popularity</a></li>
+                        {% if user.is_authenticated %}
+                        <li><hr class="dropdown-divider"></li>
+                        <li><a class="dropdown-item" href="{% url 'profile' %}"><i class="fas fa-user me-2"></i> My Profile</a></li>
+                        <li><a class="dropdown-item" href="#" id="mobile-logout-link"><i class="fas fa-sign-out-alt me-2"></i> Logout</a></li>
+                        {% endif %}
                     </ul>
                 </div>
             </div>
@@ -407,12 +416,20 @@
             
             // Logout confirmation
             const logoutLink = document.getElementById('logout-link');
+            const mobileLogoutLink = document.getElementById('mobile-logout-link');
+            
+            function showLogoutModal(e) {
+                e.preventDefault();
+                const logoutModal = new bootstrap.Modal(document.getElementById('logoutModal'));
+                logoutModal.show();
+            }
+            
             if (logoutLink) {
-                logoutLink.addEventListener('click', function(e) {
-                    e.preventDefault();
-                    const logoutModal = new bootstrap.Modal(document.getElementById('logoutModal'));
-                    logoutModal.show();
-                });
+                logoutLink.addEventListener('click', showLogoutModal);
+            }
+            
+            if (mobileLogoutLink) {
+                mobileLogoutLink.addEventListener('click', showLogoutModal);
             }
         });
     </script>

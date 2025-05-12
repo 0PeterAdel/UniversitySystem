@@ -41,4 +41,10 @@ urlpatterns = [
     path('analysis/enrollment/', views.enrollment_analysis, name='enrollment-analysis'),
     path('analysis/student-performance/', views.student_performance, name='student-performance'),
     path('analysis/course-popularity/', views.course_popularity, name='course-popularity'),
+    
+    # User profile
+    path('profile/', views.profile_view, name='profile'),
+    
+    # Custom logout
+    path('logout/', views.custom_logout, name='logout'),
 ]

@@ -25,9 +25,9 @@ SECRET_KEY = 'django-insecure-797vx&sb&=pjp694(6s8p1-c=k-x*lwyl#4xb3mesn4eup7dgw
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['*', 'work-1-esiuhvggelcpnfsd.prod-runtime.all-hands.dev', 'work-2-esiuhvggelcpnfsd.prod-runtime.all-hands.dev']
+ALLOWED_HOSTS = ['*', 'work-1-esiuhvggelcpnfsd.prod-runtime.all-hands.dev', 'work-2-esiuhvggelcpnfsd.prod-runtime.all-hands.dev', 'work-1-osgipxhyppffxuko.prod-runtime.all-hands.dev', 'work-2-osgipxhyppffxuko.prod-runtime.all-hands.dev']
 
-CSRF_TRUSTED_ORIGINS = ['https://work-1-esiuhvggelcpnfsd.prod-runtime.all-hands.dev', 'https://work-2-esiuhvggelcpnfsd.prod-runtime.all-hands.dev']
+CSRF_TRUSTED_ORIGINS = ['https://work-1-esiuhvggelcpnfsd.prod-runtime.all-hands.dev', 'https://work-2-esiuhvggelcpnfsd.prod-runtime.all-hands.dev', 'https://work-1-osgipxhyppffxuko.prod-runtime.all-hands.dev', 'https://work-2-osgipxhyppffxuko.prod-runtime.all-hands.dev']
 
 
 # Application definition
@@ -51,6 +51,7 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'enrollment.middleware.ExceptionMiddleware',
+    'enrollment.middleware.SecurityMiddleware',
 ]
 
 ROOT_URLCONF = 'seas.urls'

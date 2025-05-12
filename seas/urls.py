@@ -25,6 +25,8 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('login/', auth_views.LoginView.as_view(), name='login'),
     path('logout/', custom_logout, name='logout'),
+    path('password_change/', auth_views.PasswordChangeView.as_view(template_name='enrollment/password_change.html'), name='password_change'),
+    path('password_change/done/', auth_views.PasswordChangeDoneView.as_view(template_name='enrollment/password_change_done.html'), name='password_change_done'),
     path('', include('enrollment.urls')),
 ]
 
